@@ -1,15 +1,24 @@
 import Header from "../components/Header";
 import Footer from "../components/Footer";
-import { Outlet } from "react-router";
+import { Outlet, useLocation } from "react-router";
+
 function MainLayout() {
+  const location = useLocation();
+
+  const isAuthPage =
+    location.pathname === "/login" || location.pathname === "/register";
+
   return (
     <>
-      <Header />
+      {!isAuthPage && <Header />}
+
       <main>
         <Outlet />
       </main>
-      <Footer />
+
+      {!isAuthPage && <Footer />}
     </>
   );
 }
+
 export default MainLayout;
