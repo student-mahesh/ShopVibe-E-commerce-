@@ -6,6 +6,7 @@ import { useDispatch } from "react-redux";
 import { resetCart, setCart } from "../redux/cartSlice";
 
 import { resetOrders, setOrders } from "../redux/orderSlice";
+import { loadUserCart, loadUserOrders, readStoredJson } from "../redux/persistence";
 
 function Login() {
   const navigate = useNavigate();
@@ -31,7 +32,8 @@ function Login() {
       return;
     }
 
-    const users = JSON.parse(localStorage.getItem("users")) || [];
+    const storedUsers = readStoredJson("users", []);
+    const users = Array.isArray(storedUsers) ? storedUsers : [];
 
     const user = users.find(
       (user) =>
@@ -48,27 +50,22 @@ function Login() {
     dispatch(resetOrders());
 
     // Set current logged-in user
-    localStorage.setItem("loggedInUser", JSON.stringify(user));
+    localStorage.setItem(
+      "loggedInUser",
+      JSON.stringify({ name: user.name, email: user.email }),
+    );
 
     // -----------------------------
     // LOAD CURRENT USER'S CART
     // -----------------------------
 
-    const carts = JSON.parse(localStorage.getItem("carts")) || {};
-
-    const userCart = carts[user.email] || [];
-
-    dispatch(setCart(userCart));
+    dispatch(setCart(loadUserCart()));
 
     // -----------------------------
     // LOAD CURRENT USER'S ORDERS
     // -----------------------------
 
-    const orders = JSON.parse(localStorage.getItem("orders")) || {};
-
-    const userOrders = orders[user.email] || [];
-
-    dispatch(setOrders(userOrders));
+    dispatch(setOrders(loadUserOrders()));
 
     toast.success(`Welcome, ${user.name}!`);
 
@@ -76,12 +73,16 @@ function Login() {
   };
 
   return (
-    <div className="container mt-5">
+    <div className="container auth-page mt-5">
       <div className="row justify-content-center">
         <div className="col-md-5">
           <div className="card shadow">
             <div className="card-body">
-              <h2 className="text-center mb-4">Login</h2>
+              <h2 className="text-center mb-4">Sign in</h2>
+
+              <p className="text-muted small text-center mb-4">
+                Demo account — use a non-personal password.
+              </p>
 
               <form onSubmit={handleSubmit}>
                 <div className="mb-3">

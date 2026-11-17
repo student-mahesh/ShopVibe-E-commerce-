@@ -1,15 +1,19 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { useNavigate, Link } from "react-router";
 import { clearCart } from "../redux/cartSlice";
+import { validateCartItems } from "../redux/persistence";
 import { addOrder } from "../redux/orderSlice";
 import { toast } from "react-toastify";
+import { formatPrice } from "../utils/formatPrice";
 
 function Checkout() {
   const cartItems = useSelector((state) => state.cart.items);
 
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const submissionLock = useRef(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const totalItems = cartItems.reduce(
     (total, item) => total + item.quantity,
@@ -43,6 +47,10 @@ function Checkout() {
   const handleSubmit = (event) => {
     event.preventDefault();
 
+    if (submissionLock.current) {
+      return;
+    }
+
     /* ================= VALIDATION ================= */
 
     if (
@@ -67,11 +75,15 @@ function Checkout() {
       return;
     }
 
-    if (cartItems.length === 0) {
-      toast.error("Your cart is empty");
+    const cartValidationError = validateCartItems(cartItems);
+    if (cartValidationError) {
+      toast.error(cartValidationError);
       navigate("/products");
       return;
     }
+
+    submissionLock.current = true;
+    setIsSubmitting(true);
 
     /* ================= CREATE ORDER ================= */
 
@@ -81,7 +93,7 @@ function Checkout() {
 
       customer: formData,
 
-      items: cartItems,
+      items: cartItems.map((item) => ({ ...item })),
 
       totalItems: totalItems,
 
@@ -109,7 +121,7 @@ function Checkout() {
 
   if (cartItems.length === 0) {
     return (
-      <div className="bg-light min-vh-100">
+      <div className="transaction-page bg-light min-vh-100">
         <div className="container py-5">
           <div className="card border-0 shadow-sm text-center">
             <div className="card-body py-5">
@@ -132,7 +144,7 @@ function Checkout() {
   }
 
   return (
-    <div className="bg-light min-vh-100">
+    <div className="transaction-page bg-light min-vh-100">
       <div className="container py-4">
         {/* ================= HEADER ================= */}
 
@@ -143,9 +155,6 @@ function Checkout() {
 
           <h1 className="fw-bold mt-3 mb-1">Checkout</h1>
 
-          <p className="text-muted">
-            Complete your delivery and payment details.
-          </p>
         </div>
 
         <div className="row g-4">
@@ -318,12 +327,12 @@ function Checkout() {
                               />
 
                               <label className="form-check-label fw-semibold">
-                                💳 Online Payment
+                                💳 Demo Online Option
                               </label>
                             </div>
 
                             <small className="text-muted ms-4">
-                              Demo payment option.
+                              No real payment is processed.
                             </small>
                           </div>
                         </div>
@@ -336,8 +345,9 @@ function Checkout() {
                   <button
                     type="submit"
                     className="btn btn-primary btn-lg w-100"
+                    disabled={isSubmitting}
                   >
-                    Place Order →
+                    {isSubmitting ? "Placing Order..." : "Place Order →"}
                   </button>
                 </form>
               </div>
@@ -378,11 +388,11 @@ function Checkout() {
                       <h6 className="mb-1 fw-semibold">{item.title}</h6>
 
                       <small className="text-muted">
-                        ₹ {item.price} × {item.quantity}
+                        {formatPrice(item.price)} × {item.quantity}
                       </small>
                     </div>
 
-                    <strong>₹ {item.price * item.quantity}</strong>
+                    <strong>{formatPrice(item.price * item.quantity)}</strong>
                   </div>
                 ))}
 
@@ -401,7 +411,7 @@ function Checkout() {
                 <div className="d-flex justify-content-between mb-2">
                   <span className="text-muted">Subtotal</span>
 
-                  <span>₹ {totalPrice}</span>
+                  <span>{formatPrice(totalPrice)}</span>
                 </div>
 
                 {/* Delivery */}
@@ -420,14 +430,10 @@ function Checkout() {
                   <span className="fw-bold fs-5">Total</span>
 
                   <span className="fw-bold fs-5 text-primary">
-                    ₹ {totalPrice}
+                    {formatPrice(totalPrice)}
                   </span>
                 </div>
 
-                <div className="alert alert-light mt-4 mb-0">
-                  🔒 Your order information is stored securely in this demo
-                  application.
-                </div>
               </div>
             </div>
           </div>

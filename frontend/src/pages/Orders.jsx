@@ -1,9 +1,10 @@
 import { useSelector } from "react-redux";
 import { Link } from "react-router";
+import { formatPrice } from "../utils/formatPrice";
 function Orders() {
   const orders = useSelector((state) => state.order.orders);
   return (
-    <div className="bg-light min-vh-100">
+    <div className="transaction-page bg-light min-vh-100">
       {" "}
       <div className="container py-5">
         {" "}
@@ -114,11 +115,11 @@ function Orders() {
                           <h6 className="fw-bold mb-1"> {item.title} </h6>{" "}
                           <small className="text-muted">
                             {" "}
-                            ₹ {item.price} × {item.quantity}{" "}
+                            {formatPrice(item.price)} × {item.quantity}{" "}
                           </small>{" "}
                         </div>{" "}
                         {/* SUBTOTAL */}{" "}
-                        <strong> ₹ {item.price * item.quantity} </strong>{" "}
+                        <strong> {formatPrice(item.price * item.quantity)} </strong>{" "}
                       </div>
                     ))}{" "}
                     {/* ORDER FOOTER */}{" "}
@@ -143,7 +144,7 @@ function Orders() {
                         </small>{" "}
                         <h4 className="fw-bold text-primary mb-0">
                           {" "}
-                          ₹ {order.totalPrice}{" "}
+                          {formatPrice(order.totalPrice)}{" "}
                         </h4>{" "}
                       </div>{" "}
                     </div>{" "}

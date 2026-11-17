@@ -6,6 +6,8 @@ import {
 } from "../redux/cartSlice";
 import { Link } from "react-router";
 import Swal from "sweetalert2";
+import { toast } from "react-toastify";
+import { formatPrice } from "../utils/formatPrice";
 
 function Cart() {
   const dispatch = useDispatch();
@@ -49,7 +51,7 @@ function Cart() {
 
   if (cartItems.length === 0) {
     return (
-      <div className="bg-light min-vh-100">
+      <div className="transaction-page bg-light min-vh-100">
         <div className="container py-5">
           <div className="card border-0 shadow-sm">
             <div className="card-body text-center py-5">
@@ -74,7 +76,7 @@ function Cart() {
   /* ================= CART ================= */
 
   return (
-    <div className="bg-light min-vh-100">
+    <div className="transaction-page bg-light min-vh-100">
       <div className="container py-4">
         {/* Header */}
 
@@ -124,10 +126,10 @@ function Cart() {
                     <div className="col-8 col-md-4">
                       <h5 className="fw-bold mb-2">{item.title}</h5>
 
-                      <p className="text-muted mb-1">₹ {item.price} each</p>
+                      <p className="text-muted mb-1">{formatPrice(item.price)} each</p>
 
                       <p className="fw-bold text-primary mb-0">
-                        Subtotal: ₹ {item.price * item.quantity}
+                        Subtotal: {formatPrice(item.price * item.quantity)}
                       </p>
                     </div>
 
@@ -142,6 +144,8 @@ function Cart() {
                         <button
                           className="btn btn-outline-secondary"
                           onClick={() => dispatch(decreaseQuantity(item.id))}
+                          disabled={item.quantity <= 1}
+                          aria-label={`Decrease ${item.title} quantity`}
                         >
                           −
                         </button>
@@ -155,7 +159,16 @@ function Cart() {
 
                         <button
                           className="btn btn-outline-secondary"
-                          onClick={() => dispatch(increaseQuantity(item.id))}
+                          onClick={() => {
+                            if (item.quantity >= item.stock) {
+                              toast.error(`Only ${item.stock} ${item.title} item(s) are available.`);
+                              return;
+                            }
+
+                            dispatch(increaseQuantity(item.id));
+                          }}
+                          disabled={item.quantity >= item.stock}
+                          aria-label={`Increase ${item.title} quantity`}
                         >
                           +
                         </button>
@@ -200,7 +213,7 @@ function Cart() {
                 <div className="d-flex justify-content-between mb-3">
                   <span className="text-muted">Subtotal</span>
 
-                  <span>₹ {totalPrice}</span>
+                  <span>{formatPrice(totalPrice)}</span>
                 </div>
 
                 <div className="d-flex justify-content-between mb-3">
@@ -215,7 +228,7 @@ function Cart() {
                   <span className="fw-bold fs-5">Total</span>
 
                   <span className="fw-bold fs-5 text-primary">
-                    ₹ {totalPrice}
+                    {formatPrice(totalPrice)}
                   </span>
                 </div>
 
@@ -224,7 +237,7 @@ function Cart() {
                 </Link>
 
                 <div className="text-center mt-3">
-                  <small className="text-muted">🔒 Secure checkout</small>
+                  <small className="text-muted">Checkout available at the next step</small>
                 </div>
               </div>
             </div>

@@ -1,11 +1,12 @@
 import { useSelector } from "react-redux";
 import { Link } from "react-router";
+import { formatPrice } from "../utils/formatPrice";
 function OrderConfirmation() {
   const orders = useSelector((state) => state.order.orders);
   const latestOrder = orders[orders.length - 1];
   /* ================= NO ORDER ================= */ if (!latestOrder) {
     return (
-      <div className="bg-light min-vh-100">
+      <div className="transaction-page bg-light min-vh-100">
         {" "}
         <div className="container py-5">
           {" "}
@@ -30,7 +31,7 @@ function OrderConfirmation() {
     );
   }
   return (
-    <div className="bg-light min-vh-100">
+    <div className="transaction-page bg-light min-vh-100">
       {" "}
       <div className="container py-5">
         {" "}
@@ -126,10 +127,10 @@ function OrderConfirmation() {
                       <h6 className="fw-bold mb-1"> {item.title} </h6>{" "}
                       <small className="text-muted">
                         {" "}
-                        ₹ {item.price} × {item.quantity}{" "}
+                        {formatPrice(item.price)} × {item.quantity}{" "}
                       </small>{" "}
                     </div>{" "}
-                    <strong> ₹ {item.price * item.quantity} </strong>{" "}
+                    <strong> {formatPrice(item.price * item.quantity)} </strong>{" "}
                   </div>
                 ))}{" "}
                 {/* Total */}{" "}
@@ -138,7 +139,7 @@ function OrderConfirmation() {
                   <span className="fw-bold fs-5"> Total Amount </span>{" "}
                   <span className="fw-bold fs-5 text-primary">
                     {" "}
-                    ₹ {latestOrder.totalPrice}{" "}
+                    {formatPrice(latestOrder.totalPrice)}{" "}
                   </span>{" "}
                 </div>{" "}
               </div>{" "}
@@ -160,7 +161,7 @@ function OrderConfirmation() {
                       {" "}
                       {latestOrder.paymentMethod === "COD"
                         ? "💵 Cash on Delivery"
-                        : "💳 Online Payment"}{" "}
+                        : "💳 Demo Online Option (No payment processed)"}{" "}
                     </strong>{" "}
                   </div>{" "}
                 </div>{" "}

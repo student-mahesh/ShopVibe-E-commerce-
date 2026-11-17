@@ -9,7 +9,8 @@ import OrderConfirmation from "./pages/OrderConfirmation";
 import Orders from "./pages/Orders";
 import Register from "./pages/Register";
 import Login from "./pages/Login";
-import ProtectedRoute from "./Pages/ProtectedRoute";
+import ProtectedRoute from "./pages/ProtectedRoute";
+import NotFound from "./pages/NotFound";
 
 const router = createBrowserRouter([
   {
@@ -25,20 +26,20 @@ const router = createBrowserRouter([
         element: <Login />,
       },
       {
+        index: true,
+        element: <Home />,
+      },
+      {
+        path: "products",
+        element: <Products />,
+      },
+      {
+        path: "products/:id",
+        element: <ProductDetails />,
+      },
+      {
         element: <ProtectedRoute />,
         children: [
-          {
-            index: true,
-            element: <Home />,
-          },
-          {
-            path: "products",
-            element: <Products />,
-          },
-          {
-            path: "products/:id",
-            element: <ProductDetails />,
-          },
           {
             path: "cart",
             element: <Cart />,
@@ -56,6 +57,10 @@ const router = createBrowserRouter([
             element: <Orders />,
           },
         ],
+      },
+      {
+        path: "*",
+        element: <NotFound />,
       },
     ],
   },

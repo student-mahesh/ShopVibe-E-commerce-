@@ -1,93 +1,21 @@
 import { Link } from "react-router";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { addToCart } from "../redux/cartSlice";
 import { toast } from "react-toastify";
+import { getLoggedInUser } from "../redux/persistence";
+import { formatPrice } from "../utils/formatPrice";
 
 function ProductCard({ product }) {
   const dispatch = useDispatch();
-
+  const cartItem = useSelector((state) => state.cart.items.find((item) => item.id === product.id));
+  const isLoggedIn = Boolean(getLoggedInUser());
+  const hasDiscount = Number(product.discountPercentage) > 0;
   const handleAddToCart = () => {
+    if (cartItem && cartItem.quantity >= product.stock) return toast.error(`Only ${product.stock} ${product.title} item(s) are available.`);
     dispatch(addToCart(product));
-    toast.success(`${product.title} added to cart!`);
+    toast.success(`${product.title} added to cart.`);
   };
-
-  return (
-    <div className="card h-100 border-0 shadow-sm overflow-hidden">
-      {/* Product Image */}
-      <div
-        className="bg-light d-flex align-items-center justify-content-center"
-        style={{ height: "220px" }}
-      >
-        <img
-          src={product.thumbnail}
-          className="img-fluid"
-          alt={product.title}
-          style={{
-            maxHeight: "200px",
-            maxWidth: "90%",
-            objectFit: "contain",
-          }}
-        />
-      </div>
-
-      {/* Product Information */}
-      <div className="card-body d-flex flex-column">
-        {/* Category */}
-        <small className="text-primary text-uppercase fw-semibold mb-1">
-          {product.category}
-        </small>
-
-        {/* Title */}
-        <h5
-          className="card-title fw-bold mb-2"
-          style={{
-            minHeight: "48px",
-          }}
-        >
-          {product.title}
-        </h5>
-
-        {/* Rating */}
-        <div className="mb-2">
-          <span className="text-warning">★★★★★</span>
-
-          <small className="text-muted ms-2">{product.rating}</small>
-        </div>
-
-        {/* Price */}
-        <h5 className="text-dark fw-bold mb-3">₹ {product.price}</h5>
-
-        {/* Stock */}
-        <small
-          className={
-            product.stock > 0 ? "text-success mb-3" : "text-danger mb-3"
-          }
-        >
-          {product.stock > 0
-            ? `✓ ${product.stock} items available`
-            : "Out of stock"}
-        </small>
-
-        {/* Buttons */}
-        <div className="mt-auto">
-          <Link
-            to={`/products/${product.id}`}
-            className="btn btn-outline-primary w-100 mb-2"
-          >
-            View Details
-          </Link>
-
-          <button
-            className="btn btn-primary w-100"
-            onClick={handleAddToCart}
-            disabled={product.stock === 0}
-          >
-            🛒 Add to Cart
-          </button>
-        </div>
-      </div>
-    </div>
-  );
+  return <article className="product-card"><Link to={`/products/${product.id}`} className="product-card__image-wrap">{hasDiscount && <span className="discount-badge">{Math.round(product.discountPercentage)}% off</span>}<img src={product.thumbnail} alt={product.title} loading="lazy" onError={(event) => { event.currentTarget.style.visibility = "hidden"; }} /></Link><div className="product-card__content"><p className="product-category">{product.category.replaceAll("-", " ")}</p><h2><Link to={`/products/${product.id}`}>{product.title}</Link></h2><div className="product-meta"><span className="product-rating" aria-label={`${product.rating} out of 5 stars`}><span aria-hidden="true">★</span> {Number(product.rating).toFixed(1)}</span><span className={product.stock > 0 ? "in-stock" : "out-stock"}>{product.stock > 0 ? "In stock" : "Out of stock"}</span></div><div className="product-card__footer"><strong>{formatPrice(product.price)}</strong>{isLoggedIn ? <button className="add-button" onClick={handleAddToCart} disabled={product.stock < 1}>Add to cart</button> : <Link className="add-button text-center" to="/login">Sign in to add</Link>}</div></div></article>;
 }
 
 export default ProductCard;

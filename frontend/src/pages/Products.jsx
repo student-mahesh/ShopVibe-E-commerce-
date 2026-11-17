@@ -1,180 +1,88 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "react-router";
 import ProductCard from "../components/ProductCard";
-import { Link } from "react-router";
 
-function Products() {
-  const [product, setProduct] = useState([]);
-  const [search, setSearch] = useState("");
-  const [loading, setLoading] = useState(false);
+const PAGE_SIZE = 12;
+const categoryValue = (category) => typeof category === "string" ? category : category.slug;
+const categoryLabel = (category) => {
+  const value = categoryValue(category) || "";
+  return typeof category === "string" ? value.replaceAll("-", " ") : category.name || value.replaceAll("-", " ");
+};
+
+function Catalogue({ initialCategory, initialSearch }) {
+  const [products, setProducts] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [category, setCategory] = useState(initialCategory);
+  const [search, setSearch] = useState(initialSearch);
+  const [sort, setSort] = useState("featured");
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
   useEffect(() => {
-    setLoading(true);
-    setError("");
+    const controller = new AbortController();
+    Promise.all([
+      fetch("https://dummyjson.com/products?limit=0", { signal: controller.signal }),
+      fetch("https://dummyjson.com/products/categories", { signal: controller.signal }),
+    ])
+      .then(async ([productsResponse, categoriesResponse]) => {
+        if (!productsResponse.ok || !categoriesResponse.ok) throw new Error("Unable to load the catalogue. Please try again.");
+        const [productsData, categoriesData] = await Promise.all([productsResponse.json(), categoriesResponse.json()]);
+        setProducts(productsData.products || []);
+        setCategories(Array.isArray(categoriesData) ? categoriesData : []);
+      })
+      .catch((requestError) => {
+        if (requestError.name !== "AbortError") setError(requestError.message);
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) setLoading(false);
+      });
+    return () => controller.abort();
+  }, []);
 
-    const timer = setTimeout(() => {
-      const url = search
-        ? `https://dummyjson.com/products/search?q=${search}`
-        : "https://dummyjson.com/products";
+  const filteredProducts = useMemo(() => {
+    const normalizedSearch = search.trim().toLowerCase();
+    const result = products.filter((product) => {
+      const matchesCategory = !category || product.category === category;
+      const searchableText = `${product.title} ${product.description} ${product.brand || ""}`.toLowerCase();
+      return matchesCategory && (!normalizedSearch || searchableText.includes(normalizedSearch));
+    });
+    return result.sort((first, second) => {
+      if (sort === "price-asc") return first.price - second.price;
+      if (sort === "price-desc") return second.price - first.price;
+      if (sort === "rating-desc") return second.rating - first.rating;
+      if (sort === "title") return first.title.localeCompare(second.title);
+      return 0;
+    });
+  }, [products, category, search, sort]);
 
-      fetch(url)
-        .then((resp) => {
-          if (!resp.ok) {
-            throw new Error("Failed to load products");
-          }
+  const resetFilters = () => { setCategory(""); setSearch(""); setSort("featured"); setVisibleCount(PAGE_SIZE); };
+  const updateFilter = (setter) => (event) => { setter(event.target.value); setVisibleCount(PAGE_SIZE); };
 
-          return resp.json();
-        })
-        .then((data) => {
-          setProduct(data.products);
-        })
-        .catch((error) => {
-          setError(error.message);
-          setProduct([]);
-        })
-        .finally(() => {
-          setLoading(false);
-        });
-    }, 500);
-
-    return () => clearTimeout(timer);
-  }, [search]);
+  if (loading) return <div className="page-state"><div className="spinner-border" role="status" /><p>Loading the catalogue…</p></div>;
+  if (error) return <div className="page-state"><h1>Catalogue unavailable</h1><p>{error}</p><button className="btn btn-dark" onClick={() => window.location.reload()}>Try again</button></div>;
 
   return (
-    <div className="bg-light min-vh-100">
-      {/* ================= PAGE HEADER ================= */}
-      <section className="bg-white border-bottom">
-        <div className="container py-4">
-          <div className="row align-items-center">
-            <div className="col-md-7">
-              <h1 className="fw-bold mb-1">Explore Products</h1>
-
-              <p className="text-muted mb-0">
-                Find the products you need at great prices.
-              </p>
-            </div>
-
-            <div className="col-md-5 text-md-end mt-3 mt-md-0">
-              <Link to="/" className="btn btn-outline-primary">
-                ← Back to Home
-              </Link>
-            </div>
-          </div>
+    <div className="catalogue-page">
+      <section className="container app-container catalogue-content">
+        <div className="catalogue-controls">
+          <div className="catalogue-search"><label htmlFor="catalogue-search">Search products</label><input id="catalogue-search" value={search} onChange={updateFilter(setSearch)} placeholder="Search by product or brand" /></div>
+          <div><label htmlFor="catalogue-category">Category</label><select id="catalogue-category" value={category} onChange={updateFilter(setCategory)}><option value="">All categories</option>{categories.map((item) => <option key={categoryValue(item)} value={categoryValue(item)}>{categoryLabel(item)}</option>)}</select></div>
+          <div><label htmlFor="catalogue-sort">Sort by</label><select id="catalogue-sort" value={sort} onChange={updateFilter(setSort)}><option value="featured">Featured</option><option value="price-asc">Price: low to high</option><option value="price-desc">Price: high to low</option><option value="rating-desc">Highest rated</option><option value="title">Title: A–Z</option></select></div>
+          <button className="text-button" onClick={resetFilters}>Clear filters</button>
         </div>
-      </section>
-
-      {/* ================= SEARCH ================= */}
-      <section className="container py-4">
-        <div className="card border-0 shadow-sm">
-          <div className="card-body p-4">
-            <div className="row align-items-center">
-              <div className="col-md-8">
-                <label className="form-label fw-semibold">
-                  Search Products
-                </label>
-
-                <div className="input-group">
-                  <span className="input-group-text bg-white">🔎</span>
-
-                  <input
-                    type="text"
-                    className="form-control"
-                    placeholder="Search for phones, laptops, watches..."
-                    value={search}
-                    onChange={(e) => setSearch(e.target.value)}
-                  />
-
-                  {search && (
-                    <button
-                      className="btn btn-outline-secondary"
-                      type="button"
-                      onClick={() => setSearch("")}
-                    >
-                      Clear
-                    </button>
-                  )}
-                </div>
-              </div>
-
-              <div className="col-md-4 mt-3 mt-md-0 text-md-end">
-                {!loading && !error && (
-                  <span className="text-muted">
-                    <strong>{product.length}</strong> products found
-                  </span>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ================= PRODUCTS ================= */}
-      <section className="container pb-5">
-        {/* Loading */}
-        {loading && (
-          <div className="text-center py-5">
-            <div className="spinner-border text-primary" role="status">
-              <span className="visually-hidden">Loading...</span>
-            </div>
-
-            <p className="text-muted mt-3">Loading products...</p>
-          </div>
-        )}
-
-        {/* Error */}
-        {!loading && error && (
-          <div className="alert alert-danger text-center" role="alert">
-            <h5 className="alert-heading">Something went wrong</h5>
-
-            <p className="mb-0">{error}</p>
-          </div>
-        )}
-
-        {/* No Products */}
-        {!loading && !error && product.length === 0 && (
-          <div className="text-center py-5">
-            <div className="display-3">🔎</div>
-
-            <h4 className="mt-3">No products found</h4>
-
-            <p className="text-muted">
-              Try searching with a different product name.
-            </p>
-
-            <button className="btn btn-primary" onClick={() => setSearch("")}>
-              Show All Products
-            </button>
-          </div>
-        )}
-
-        {/* Product Grid */}
-        {!loading && !error && product.length > 0 && (
-          <>
-            <div className="d-flex justify-content-between align-items-center mb-4">
-              <div>
-                <h3 className="fw-bold mb-1">All Products</h3>
-
-                <p className="text-muted mb-0">
-                  Choose a product to view more details.
-                </p>
-              </div>
-            </div>
-
-            <div className="row g-4">
-              {product.map((item) => (
-                <div
-                  className="col-12 col-sm-6 col-md-4 col-lg-3"
-                  key={item.id}
-                >
-                  <ProductCard product={item} />
-                </div>
-              ))}
-            </div>
-          </>
-        )}
+        <div className="catalogue-summary"><p><strong>{filteredProducts.length}</strong> products found</p><p>{category ? `Category: ${category.replaceAll("-", " ")}` : "All categories"}</p></div>
+        {filteredProducts.length ? <><div className="product-grid">{filteredProducts.slice(0, visibleCount).map((product) => <ProductCard key={product.id} product={product} />)}</div>{visibleCount < filteredProducts.length && <div className="text-center pt-5"><button className="btn btn-outline-dark" onClick={() => setVisibleCount((count) => count + PAGE_SIZE)}>Load more products</button></div>}</> : <div className="empty-state"><h2>No products match those filters.</h2><p>Try a different search or clear the active filters.</p><button className="btn btn-dark" onClick={resetFilters}>Clear filters</button></div>}
       </section>
     </div>
   );
+}
+
+function Products() {
+  const [searchParams] = useSearchParams();
+  const initialCategory = searchParams.get("category") || "";
+  const initialSearch = searchParams.get("search") || "";
+  return <Catalogue key={`${initialCategory}-${initialSearch}`} initialCategory={initialCategory} initialSearch={initialSearch} />;
 }
 
 export default Products;

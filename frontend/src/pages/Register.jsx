@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router";
 import { toast } from "react-toastify";
+import { readStoredJson } from "../redux/persistence";
 
 function Register() {
   const navigate = useNavigate();
@@ -37,7 +38,8 @@ function Register() {
       return;
     }
 
-    const existingUsers = JSON.parse(localStorage.getItem("users")) || [];
+    const storedUsers = readStoredJson("users", []);
+    const existingUsers = Array.isArray(storedUsers) ? storedUsers : [];
 
     const userExists = existingUsers.some(
       (user) => user.email === formData.email,
@@ -62,12 +64,16 @@ function Register() {
   };
 
   return (
-    <div className="container mt-5">
+    <div className="container auth-page mt-5">
       <div className="row justify-content-center">
         <div className="col-md-6">
           <div className="card shadow">
             <div className="card-body">
-              <h2 className="text-center mb-4">Create Account</h2>
+              <h2 className="text-center mb-4">Create an account</h2>
+
+              <p className="text-muted small text-center mb-4">
+                Demo account — use a non-personal password.
+              </p>
 
               <form onSubmit={handleSubmit}>
                 <div className="mb-3">
