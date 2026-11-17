@@ -1,217 +1,157 @@
-# E-Commerce Platform — React Frontend
+# ShopVibe — E-Commerce Frontend
 
-A responsive e-commerce frontend application built with **React and JavaScript**, featuring product browsing, search, category filtering, product details, and shopping cart management.
+ShopVibe is a responsive frontend e-commerce application built using React and JavaScript. It provides product browsing, search, category filtering, product details, shopping cart management, user registration, login, checkout, order confirmation, and order history.
 
-The application integrates the [DummyJSON Products API](https://dummyjson.com/docs/products) to retrieve product data and uses **Redux Toolkit** for centralized shopping cart state management.
-
-This project demonstrates frontend development concepts including component-based architecture, API integration, client-side routing, and global state management.
+Product information is retrieved from the [DummyJSON Products API](https://dummyjson.com/docs/products). Redux Toolkit manages cart and order state, while browser localStorage provides demonstration persistence.
 
 ## Features
 
-- **Product Catalogue:** Browse products retrieved from the DummyJSON API.
-- **Product Search:** Search for products in the catalogue.
+- **Product Catalogue:** Browse products from DummyJSON.
+- **Product Search:** Search for products.
 - **Category Filtering:** Filter products by category.
 - **Product Details:** View individual product information.
-- **Shopping Cart:** Add products to the shopping cart.
-- **Quantity Management:** Increase or decrease product quantities.
-- **Remove Products:** Remove items from the shopping cart.
-- **Cart Calculations:** Calculate item quantities and cart subtotal.
-- **Global State Management:** Manage shared cart state using Redux Toolkit.
-- **Client-Side Navigation:** Navigate between application pages using React Router.
-- **Responsive UI:** User interface designed for different screen sizes.
+- **Shopping Cart:** Add, remove, and update product quantities.
+- **Cart Calculations:** View item quantities and subtotal.
+- **User Registration and Login:** Frontend demonstration authentication.
+- **Protected Routes:** Restrict access to selected pages.
+- **Checkout:** Complete the frontend checkout workflow.
+- **Order Confirmation:** Display order confirmation and order ID.
+- **Order History:** View previously placed demonstration orders.
+- **Persistent State:** Use browser localStorage for supported cart, authentication, and order data.
+- **Responsive Design:** Bootstrap-based responsive interface.
 
 ## Technology Stack
 
 | Technology | Purpose |
 |---|---|
-| React | Component-based UI development |
+| React 19 | User interface |
 | JavaScript | Application logic |
-| React Router | Client-side routing and navigation |
-| Redux Toolkit | Centralized state management |
-| Fetch API | Fetching product data |
-| DummyJSON API | Sample product data |
-| CSS | User interface styling (verify the styling technology used) |
-| npm | Package and dependency management |
-| Git & GitHub | Version control and source-code hosting |
+| Vite 8 | Development server and build tool |
+| React Router | Client-side navigation |
+| Redux Toolkit | Cart and order state management |
+| React Redux | Redux integration with React |
+| Bootstrap 5 | Responsive styling |
+| DummyJSON API | External product data |
+| localStorage | Browser-side demonstration persistence |
+| Vitest | Automated testing |
+| Oxlint | Code linting |
+| Git and GitHub | Version control |
 
 ## Application Architecture
 
-The application follows a component-based frontend architecture. Product data is fetched from an external API, displayed through React components, and managed through application state.
+ShopVibe follows a component-based React architecture.
 
-### Application Flow
+1. Product information is retrieved from DummyJSON.
+2. React components display products and product details.
+3. Redux Toolkit manages shopping cart and order state.
+4. Users can register, log in, and access protected pages.
+5. Users can add products to the cart and proceed to checkout.
+6. Order confirmation and order history use browser-side persistence.
+
+## Project Structure
 
 ```text
-       DummyJSON Products API
-                  |
-                  v
-              Fetch API
-                  |
-                  v
-          React Components
-                  |
-          +-------+-------+
-          |               |
-          v               v
-      Product List    Product Search
-          |
-          v
-     Category Filter
-          |
-          v
-    Product Details
-          |
-          v
-     Redux Toolkit
-      (Cart Store)
-          |
-          v
-      Shopping Cart
-          |
-          v
-   Quantity / Remove /
-     Cart Subtotal
+ShopVibe-E-commerce-/
+├── docs/
+│   └── PROJECT_CONTEXT.MD
+├── frontend/
+│   ├── public/
+│   └── src/
+│       ├── assets/
+│       ├── components/
+│       ├── layouts/
+│       ├── pages/
+│       ├── redux/
+│       ├── utils/
+│       ├── App.css
+│       ├── App.jsx
+│       ├── index.css
+│       └── main.jsx
+├── .gitignore
+└── README.md
 ```
-
-## State Management with Redux Toolkit
-
-Redux Toolkit is used to manage the application's shopping cart state centrally.
-
-The cart supports the following operations:
-
-- Add products to the cart.
-- Update product quantities.
-- Remove products from the cart.
-- Calculate the total number of cart items.
-- Calculate the cart subtotal.
-
-Centralized state management helps maintain consistent cart information across different components and avoids unnecessary duplication of state.
-
-## External API Integration
-
-The application retrieves product information from the DummyJSON Products API.
-
-**API Documentation:** [DummyJSON Products API](https://dummyjson.com/docs/products)
-
-Example API endpoint:
-
-```http
-GET https://dummyjson.com/products
-```
-
-The frontend consumes the API response and renders the available product information through React components.
-
-**Note:** DummyJSON is used as an external sample-data provider. This project does not implement its own backend API or database.
 
 ## Getting Started
 
 ### Prerequisites
 
-Make sure you have installed:
-
 - Node.js
 - npm
 - Git
 
-### 1. Clone the Repository
+### 1. Clone the repository
 
 ```bash
-git clone https://github.com/student-mahesh/e-commerce-platform.git
+git clone https://github.com/student-mahesh/ShopVibe-E-commerce-.git
 ```
 
-Navigate into the project directory:
+### 2. Navigate to the frontend directory
 
 ```bash
-cd e-commerce-platform
+cd ShopVibe-E-commerce-/frontend
 ```
 
-### 2. Install Dependencies
+### 3. Install dependencies
 
 ```bash
 npm install
 ```
 
-### 3. Start the Development Server
+### 4. Start the development server
 
 ```bash
 npm run dev
 ```
 
-Open the local development URL displayed in your terminal.
+Open the local URL displayed in the terminal.
 
-### 4. Create a Production Build
+### 5. Create a production build
 
 ```bash
 npm run build
 ```
 
-### 5. Preview the Production Build
+### 6. Run automated tests
 
 ```bash
-npm run preview
+npm test
 ```
 
-## Project Structure
+### 7. Run lint checks
 
-The following is an illustrative structure. Update it to match the actual repository.
-
-```text
-src/
-├── app/
-│   └── store.js
-│
-├── components/
-│   ├── Header.jsx
-│   └── Footer.jsx
-│
-├── features/
-│   └── cart/
-│       └── cartSlice.js
-│
-├── pages/
-│   ├── Home.jsx
-│   ├── Products.jsx
-│   ├── ProductDetails.jsx
-│   └── Cart.jsx
-│
-├── services/
-│   └── productApi.js
-│
-├── routes/
-│
-├── App.jsx
-└── main.jsx
+```bash
+npm run lint
 ```
 
-## Project Scope
+## Project Scope and Limitations
 
-This repository currently focuses on frontend development.
+ShopVibe is currently a frontend-only application.
 
-- Product information is retrieved from the DummyJSON API.
-- Shopping cart operations are handled on the frontend using Redux Toolkit.
-- React Router manages client-side navigation.
-- There is no custom Spring Boot backend.
-- There is no Hibernate or MySQL database integration.
-- Real authentication, payment processing, and backend order management are not included unless implemented separately.
+- Product information comes from the external DummyJSON API.
+- Cart and order state are managed on the frontend.
+- Supported data is persisted using browser localStorage.
+- Authentication is a demonstration workflow, not production-secure server authentication.
+- There is no implemented backend API.
+- There is no integrated MySQL database or Hibernate/JPA layer.
+- Checkout does not process real payments.
+- Orders are browser-side demonstration records, not server-managed transactions.
+- Product data depends on the availability of the external API.
 
 ## Future Enhancements
 
-Potential improvements for future development:
-
-- Integrate a custom Spring Boot REST API.
-- Implement user registration and authentication.
-- Persist shopping cart data across browser sessions.
-- Add backend order management.
-- Integrate a payment gateway.
-- Add automated frontend testing.
-- Deploy the application to a hosting platform.
+- Integrate a backend REST API.
+- Implement secure server-side authentication.
+- Add database-backed product and order management.
+- Integrate a real payment gateway.
+- Deploy the application.
 
 ## Author
 
 **Mahesh Savkar**
 
 - GitHub: [student-mahesh](https://github.com/student-mahesh)
-- LinkedIn: [mahesh-savkar](https://www.linkedin.com/in/mahesh-savkar-300377294/)
+- LinkedIn: [Mahesh Savkar](https://www.linkedin.com/in/mahesh-savkar-300377294/)
 
 ---
 
-*Built as a frontend development project to practise React, JavaScript, API integration, routing, and Redux Toolkit.*
+*ShopVibe — A frontend e-commerce project built with React, JavaScript, Redux Toolkit, and Bootstrap.*
