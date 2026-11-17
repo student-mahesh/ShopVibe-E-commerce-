@@ -1,8 +1,8 @@
-# PROJECT CONTEXT — E-Commerce Platform
+# PROJECT CONTEXT — ShopVibe
 
 ## Project Purpose
 
-Build a React-based E-Commerce Platform for the August 31, 2026 project competition.
+Build a React-based ShopVibe storefront for the August 31, 2026 project competition.
 
 The goal is to demonstrate practical software development skills using React, JavaScript, React Router, Redux Toolkit, APIs, Git, and GitHub.
 
